@@ -1,8 +1,8 @@
-The aim of this project is to write a tool that would
-  * regularly spider PubMed Central to locate audio and video files published in the supplementary materials of CC BY-licensed articles in the Open subset
-  * convert these files to OGG
-  * upload them to Wikimedia Commons, along with the respective metadata
-  * provide for easy extension to other CC-BY sources, beyond PubMed Central
-  * (possibly) suggest Wikipedia articles for which the video might be relevant
+The aim of this project is to write a tool that would:
+* regularly spider PubMed Central to locate audio and video files published in the supplementary materials of CC BY-licensed articles in the Open subset
+* convert these files to OGG
+* upload them to Wikimedia Commons, along with the respective metadata
+* provide for easy extension to other CC-BY sources, beyond PubMed Central
+* (possibly) suggest Wikipedia articles for which the video might be relevant
 
 Wiki page: http://en.wikiversity.org/wiki/User:OpenScientist/Open_grant_writing/Wissenswert_2011
