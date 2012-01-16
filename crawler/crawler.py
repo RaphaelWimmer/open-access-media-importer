@@ -6,8 +6,20 @@ import os, progressbar, sys, tarfile
 from ftplib import FTP
 from xml.etree.ElementTree import ElementTree
 
-FTP_SERVER = 'ftp.ncbi.nlm.nih.gov'
 CACHE_DIRECTORY = 'PubMed'
+
+FTP_SERVER = 'ftp.ncbi.nlm.nih.gov'
+FTP_FILENAMES = [
+    'pub/pmc/articles.A-B.tar.gz',
+    'pub/pmc/articles.C-H.tar.gz',
+    'pub/pmc/articles.I-N.tar.gz',
+    'pub/pmc/articles.O-Z.tar.gz'
+]
+
+LOCAL_FILENAMES = [
+    os.path.join(CACHE_DIRECTORY, os.path.split(remote_filename)[-1])
+    for remote_filename in FTP_FILENAMES
+]
 
 def get_PubMed_XML_TAR_GZ():
     """
@@ -17,16 +29,8 @@ def get_PubMed_XML_TAR_GZ():
     ftp = FTP(FTP_SERVER)
     ftp.login()
 
-    ftp_filenames = (
-        'pub/pmc/articles.A-B.tar.gz',
-        'pub/pmc/articles.C-H.tar.gz',
-        'pub/pmc/articles.I-N.tar.gz',
-        'pub/pmc/articles.O-Z.tar.gz'
-    )
-
-    for remote_filename in ftp_filenames:
-        local_filename = os.path.join(CACHE_DIRECTORY,
-            os.path.split(remote_filename)[-1])
+    for i,remote_filename in enumerate(FTP_FILENAMES):
+        local_filename = LOCAL_FILENAMES[i]
 
         ftp.sendcmd('TYPE i')  # switch to binary mode,
         remote_filesize = ftp.size(remote_filename)
