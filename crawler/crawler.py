@@ -56,7 +56,6 @@ def get_PubMed_XML_TAR_GZ():
 
     ftp.quit()
 
-get_PubMed_XML_TAR_GZ()
 
 def find_PubMed_articles_with_supplementary_materials(filename):
     """
@@ -68,12 +67,31 @@ def find_PubMed_articles_with_supplementary_materials(filename):
                 content = archive.extractfile(item)
                 tree = ElementTree()
                 tree.parse(content)
-                for element in tree.iter('xref'):
+                for xref in tree.iter('xref'):
                     try:
-                        if element.attrib['ref-type'] == 'supplementary-material':
-                            print element.attrib, element.text
+                        if xref.attrib['ref-type'] == 'supplementary-material':
+                            rid = xref.attrib['rid']
+                            for sup in tree.iter('supplementary-material'):
+                                if sup.attrib['id'] == rid:
+                                    media = ElementTree(sup).find('media')
+                                    sys.stderr.write(
+                                        str(media.attrib['mimetype']) +
+                                        '/' +
+                                        str(media.attrib['mime-subtype']) +
+                                        ' ' +
+                                        str(media.attrib['{http://www.w3.org/1999/xlink}href']) +
+                                        '\n'
+                                    )
+                                    sys.stderr.flush()
                     except KeyError:
+                        pass
+                    except AttributeError:
                         pass
     # TODO: return a list of identifiers
 
-find_PubMed_articles_with_supplementary_materials('PubMed/articles.A-B.tar.gz')
+
+if __name__ == '__main__':
+    get_PubMed_XML_TAR_GZ()
+
+    for f in LOCAL_FILENAMES:
+        find_PubMed_articles_with_supplementary_materials(f)
