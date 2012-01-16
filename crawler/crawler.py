@@ -57,6 +57,17 @@ def get_PubMed_XML_TAR_GZ():
     ftp.quit()
 
 
+def PubMed_absolute_URL(PMCID, href):
+    """
+    This function creates absolute URIs for supplementary materials,
+    using a PubMed Central ID and a relative URI.
+    """
+    PREFIX = 'http://www.ncbi.nlm.nih.gov/pmc/articles/PMC'
+    SUFFIX = '/bin/'
+
+    return str(PREFIX + PMCID + SUFFIX + href)
+
+
 def find_PubMed_articles_with_supplementary_materials(filename):
     """
     This function finds articles having supplementary materials.
@@ -74,20 +85,19 @@ def find_PubMed_articles_with_supplementary_materials(filename):
                             for sup in tree.iter('supplementary-material'):
                                 if sup.attrib['id'] == rid:
                                     media = ElementTree(sup).find('media')
-                                    sys.stderr.write(
-                                        str(media.attrib['mimetype']) +
-                                        '/' +
-                                        str(media.attrib['mime-subtype']) +
-                                        ' ' +
-                                        str(media.attrib['{http://www.w3.org/1999/xlink}href']) +
-                                        '\n'
-                                    )
-                                    sys.stderr.flush()
+                                    if media.attrib['mimetype']:  # in ('audio', 'video'):
+                                        href = media.attrib['{http://www.w3.org/1999/xlink}href']
+                                        for aid in tree.iter('article-id'):
+                                            if aid.attrib['pub-id-type'] == 'pmc':
+                                                PMCID = aid.text
+                                        sys.stderr.write(
+                                            PubMed_absolute_URL(PMCID, href) + '\n'
+                                        )
+                                        sys.stderr.flush()
                     except KeyError:
                         pass
                     except AttributeError:
                         pass
-    # TODO: return a list of identifiers
 
 
 if __name__ == '__main__':
