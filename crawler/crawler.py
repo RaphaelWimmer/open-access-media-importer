@@ -33,10 +33,10 @@ def get_PubMed_XML_TAR_GZ():
         try:
             os.stat(os.path.join(CACHE_DIRECTORY, CACHE_PUBMED))
         except OSError:
-            print "Cannot create cache directory. Aborting"
+            sys.stderr.write("Cannot create cache directory. Aborting.\n")
             sys.exit(1)
         else:
-            print "Cache directory already exists. Using it."
+            sys.stderr.write("Cache directory already exists. Using it.\n")
 
     ftp = FTP(FTP_SERVER)
     ftp.login()
