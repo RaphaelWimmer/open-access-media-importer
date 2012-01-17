@@ -6,7 +6,9 @@ import os, progressbar, sys, tarfile
 from ftplib import FTP
 from xml.etree.ElementTree import ElementTree
 
-CACHE_DIRECTORY = 'PubMed'
+
+CACHE_DIRECTORY = 'cache'
+CACHE_PUBMED = 'PubMed'
 
 FTP_SERVER = 'ftp.ncbi.nlm.nih.gov'
 FTP_FILENAMES = [
@@ -17,7 +19,7 @@ FTP_FILENAMES = [
 ]
 
 LOCAL_FILENAMES = [
-    os.path.join(CACHE_DIRECTORY, os.path.split(remote_filename)[-1])
+    os.path.join(CACHE_DIRECTORY, CACHE_PUBMED, os.path.split(remote_filename)[-1])
     for remote_filename in FTP_FILENAMES
 ]
 
@@ -25,6 +27,7 @@ def get_PubMed_XML_TAR_GZ():
     """
     This function downloads XML archive files from PubMed.
     """
+    os.makedirs(os.path.join(CACHE_DIRECTORY, CACHE_PUBMED))
 
     ftp = FTP(FTP_SERVER)
     ftp.login()
