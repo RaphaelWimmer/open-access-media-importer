@@ -18,31 +18,38 @@ FTP_FILENAMES = [
     'pub/pmc/articles.O-Z.tar.gz'
 ]
 
-LOCAL_FILENAMES = [
-    os.path.join(CACHE_DIRECTORY, CACHE_PUBMED, os.path.split(remote_filename)[-1])
-    for remote_filename in FTP_FILENAMES
-]
-
 def get_PubMed_XML_TAR_GZ():
     """
     This function downloads XML archive files from PubMed.
     """
+    cache_dir = os.path.join(CACHE_DIRECTORY, CACHE_PUBMED)
     try:
-        os.makedirs(os.path.join(CACHE_DIRECTORY, CACHE_PUBMED))
+        os.makedirs(cache_dir)
     except OSError:
         try:
-            os.stat(os.path.join(CACHE_DIRECTORY, CACHE_PUBMED))
+            os.stat(cache_dir)
         except OSError:
             sys.stderr.write("Cannot create cache directory. Aborting.\n")
             sys.exit(1)
         else:
             sys.stderr.write("Cache directory already exists. Using it.\n")
 
-    ftp = FTP(FTP_SERVER)
+    local_files = ftp_download_files(FTP_SERVER, FTP_FILENAMES, cache_dir)
+    return local_files
+
+def ftp_download_files(server, filenames, local_dir, skip_same_sized=True):
+    """
+    Download a list of files from a ftp server into a local directory. 
+    Optionally skip files that have the same size locally and on the server.
+    """
+
+    downloaded_filenames = []
+    ftp = FTP(server)
     ftp.login()
 
-    for i,remote_filename in enumerate(FTP_FILENAMES):
-        local_filename = LOCAL_FILENAMES[i]
+    for i,remote_filename in enumerate(filenames):
+        local_filename =  os.path.join(local_dir, os.path.split(remote_filename)[-1])
+        downloaded_filenames.append(local_filename)
 
         ftp.sendcmd('TYPE i')  # switch to binary mode,
         remote_filesize = ftp.size(remote_filename)
@@ -51,11 +58,11 @@ def get_PubMed_XML_TAR_GZ():
         except OSError:  # File does not exist
             local_filesize = 0
 
-        if remote_filesize == local_filesize:
+        if remote_filesize == local_filesize and skip_same_sized == True :
             sys.stderr.write("%s is up to date, skipping.\n" % local_filename)
         else:
             sys.stderr.write("Downloading %s from %s, saving as %s …\n" % \
-                (remote_filename, FTP_SERVER, local_filename))
+                (remote_filename, server, local_filename))
 
             with open(local_filename, 'wb') as f:
                 p = progressbar.ProgressBar(maxval=remote_filesize)
@@ -67,6 +74,7 @@ def get_PubMed_XML_TAR_GZ():
                 ftp.retrbinary("RETR %s" % remote_filename, callback)
 
     ftp.quit()
+    return downloaded_filenames
 
 
 def PubMed_absolute_URL(PMCID, href):
@@ -113,7 +121,7 @@ def find_PubMed_articles_with_supplementary_materials(filename):
 
 
 if __name__ == '__main__':
-    get_PubMed_XML_TAR_GZ()
+    archive_files = get_PubMed_XML_TAR_GZ()
 
-    for f in LOCAL_FILENAMES:
+    for f in archive_files:
         find_PubMed_articles_with_supplementary_materials(f)
