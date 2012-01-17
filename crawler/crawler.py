@@ -27,7 +27,16 @@ def get_PubMed_XML_TAR_GZ():
     """
     This function downloads XML archive files from PubMed.
     """
-    os.makedirs(os.path.join(CACHE_DIRECTORY, CACHE_PUBMED))
+    try:
+        os.makedirs(os.path.join(CACHE_DIRECTORY, CACHE_PUBMED))
+    except OSError:
+        try:
+            os.stat(os.path.join(CACHE_DIRECTORY, CACHE_PUBMED))
+        except OSError:
+            print "Cannot create cache directory. Aborting"
+            sys.exit(1)
+        else:
+            print "Cache directory already exists. Using it."
 
     ftp = FTP(FTP_SERVER)
     ftp.login()
